@@ -1,0 +1,36 @@
+2
+--- Phase 1 - gathering data ---
+Average request time: 0:00:00.468939
+Phase 1 took: 0:00:01.757652
+
+
+--- Phase 2 - generate PDF ---
+Average pdf generation time: 0:00:02.461167
+Phase 2 took: 0:00:08.792939
+
+
+--- Summary ---
+Whole process took: 0:00:10.550591
+
+
+
+--- Details Phase 1 ---
+[
+    "Task: 0 (start) - PID: 1 CPU: 21.7%, RAM (GB): avl: 24.86, used: 5.85, 20.8%)",
+    "Task: 0 (end) - PID: 1 CPU: 9.5%, RAM (GB): avl: 24.82, used: 5.89, 20.9%)",
+    "Task: 1 (start) - PID: 1 CPU: 0.0%, RAM (GB): avl: 24.82, used: 5.89, 20.9%)",
+    "Task: 1 (end) - PID: 1 CPU: 10.3%, RAM (GB): avl: 24.93, used: 5.78, 20.5%)",
+    "Task: 2 (start) - PID: 1 CPU: 0.0%, RAM (GB): avl: 24.93, used: 5.78, 20.5%)",
+    "Task: 2 (end) - PID: 1 CPU: 10.8%, RAM (GB): avl: 24.93, used: 5.78, 20.5%)"
+]
+
+
+--- Details Phase 2 ---
+[
+    "Task: 0 (start) - PID: 1 CPU: 0.0%, RAM (GB): avl: 24.93, used: 5.78, 20.5%)",
+    "Task: 0 (end) - PID: 1 CPU: 23.0%, RAM (GB): avl: 24.79, used: 5.93, 21.0%)",
+    "Task: 1 (start) - PID: 1 CPU: 0.0%, RAM (GB): avl: 24.79, used: 5.93, 21.0%)",
+    "Task: 1 (end) - PID: 1 CPU: 23.2%, RAM (GB): avl: 24.69, used: 6.02, 21.3%)",
+    "Task: 2 (start) - PID: 1 CPU: 0.0%, RAM (GB): avl: 24.69, used: 6.02, 21.3%)",
+    "Task: 2 (end) - PID: 1 CPU: 23.2%, RAM (GB): avl: 24.75, used: 5.96, 21.1%)"
+]
