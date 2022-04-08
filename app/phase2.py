@@ -1,7 +1,7 @@
 import base64
 # from zipfile import ZipFile
 from faker import Faker
-from app.utils import Report
+from app.utils import generate_details_log
 import psutil
 import concurrent.futures
 import multiprocessing
@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from app.generate_pdf import convert_html_to_pdf
 
 
-class PhaseTwo(Report):
+class PhaseTwo():
 
     phase_2_sub_duration = []
     phase_2_details = []
@@ -20,7 +20,7 @@ class PhaseTwo(Report):
     def __worker(self, i):
         subprocess_start = datetime.now()
         self.phase_2_details.append(
-            self.generate_details(
+            generate_details_log(
                 i,
                 psutil.pids(),
                 psutil.cpu_percent(interval=None),
@@ -45,10 +45,9 @@ class PhaseTwo(Report):
         convert_html_to_pdf(context, output_filename)
 
         subprocess_end = datetime.now()
-        self.phase_2_sub_duration.append(
-            self.get_time_diff(subprocess_start, subprocess_end))
+        self.phase_2_sub_duration.append(subprocess_end - subprocess_start)
         self.phase_2_details.append(
-            self.generate_details(
+            generate_details_log(
                 i,
                 psutil.pids(),
                 psutil.cpu_percent(interval=None),
