@@ -91,19 +91,16 @@ class PhaseOne(Report):
     #         )
     #     )
 
-    def common_images_download(self, no_of_images):
-        # self.start = datetime.now()
+    def common_images_download(self, no_of_images) -> None:
         for i in range(0, no_of_images):
             worker(i)
 
-    def multhreading_images_download(self, no_of_images, max_workers=10):
-        self.start = datetime.now()
+    def multhreading_images_download(self, no_of_images, max_workers=10) -> None:
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             for i in range(0, no_of_images):
-                executor.submit(self.__worker, i)
+                executor.submit(worker, i)
 
     def multprocessing_images_download(self, no_of_images, max_workers=10):
-        # self.start = datetime.now()
 
         global worker
 
