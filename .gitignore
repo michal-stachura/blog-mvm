@@ -1,3 +1,5 @@
 downloads/*
 results/*
 app.log
+
+*.pyc
