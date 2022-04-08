@@ -122,8 +122,6 @@ class PhaseOne(Report):
 
             phase_1_sub_duration = list(m_phase_1_sub_duration)
             phase_1_details = list(m_phase_1_details)
-            print(phase_1_sub_duration)
-        print(phase_1_sub_duration)
 
     def get_avg_time(self):
         return sum(phase_1_sub_duration, timedelta()) / len(phase_1_sub_duration)
