@@ -1,5 +1,4 @@
 import base64
-# from zipfile import ZipFile
 from faker import Faker
 from app.utils import generate_details_log
 import psutil
@@ -8,6 +7,25 @@ import multiprocessing
 
 from datetime import datetime, timedelta
 from app.generate_pdf import convert_html_to_pdf
+
+fake = Faker()
+
+
+def job(i: int):
+    with open(f"downloads/img{i}.jpg", "rb") as img:
+        face = base64.b64encode(img.read())
+    context = {
+        "name": fake.name(),
+        "birth": fake.date(),
+        "phone": fake.phone_number(),
+        "email": fake.email(),
+        "address": fake.address(),
+        "bio": fake.text(),
+        "face": f"data:image/jpeg;base64,{face.decode('utf-8')}"
+    }
+
+    output_filename = f"test{i}.pdf"
+    convert_html_to_pdf(context, output_filename)
 
 
 class PhaseTwo():
@@ -29,20 +47,7 @@ class PhaseTwo():
             )
         )
 
-        with open(f"downloads/img{i}.jpg", "rb") as img:
-            face = base64.b64encode(img.read())
-        context = {
-            "name": self.fake.name(),
-            "birth": self.fake.date(),
-            "phone": self.fake.phone_number(),
-            "email": self.fake.email(),
-            "address": self.fake.address(),
-            "bio": self.fake.text(),
-            "face": f"data:image/jpeg;base64,{face.decode('utf-8')}"
-        }
-
-        output_filename = f"test{i}.pdf"
-        convert_html_to_pdf(context, output_filename)
+        job(i)
 
         subprocess_end = datetime.now()
         self.phase_2_sub_duration.append(subprocess_end - subprocess_start)
