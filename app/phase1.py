@@ -18,6 +18,25 @@ def generate_details(task, pids, cpu, memory, start=None):
     return f"Task: {task} ({task_start_or_end}) - PID: {len(pids)} CPU: {cpu}%, RAM (GB): avl: {round(memory.available/1073741824, 2)}, used: {round(memory.used/1073741824, 2)}, {memory.percent}%)"
 
 
+def multiprocessing_worker(i, phase_1_sub_duration, phase_1_details):
+    subprocess_start = datetime.now()
+    phase_1_details.append(
+        f"Task: {i} (start) - PID: {len(psutil.pids())} CPU: {psutil.cpu_percent(interval=None)}%, RAM (GB): avl: {round(psutil.virtual_memory().available/1073741824, 2)}, used: {round(psutil.virtual_memory().used/1073741824, 2)}, {psutil.virtual_memory().percent}%)"
+    )
+
+    res = requests.get(
+        "https://thispersondoesnotexist.com/image", stream=True)
+    image_name = f"img{i}.jpg"
+    if res.status_code == 200:
+        res.raw.decode_content = True
+        with open(f"downloads/{image_name}", "wb") as file:
+            shutil.copyfileobj(res.raw, file)
+
+    subprocess_end = datetime.now()
+    phase_1_sub_duration.append(subprocess_end - subprocess_start)
+    phase_1_details.append(
+        f"Task: {i} (end) - PID: {len(psutil.pids())} CPU: {psutil.cpu_percent(interval=None)}%, RAM (GB): avl: {round(psutil.virtual_memory().available/1073741824, 2)}, used: {round(psutil.virtual_memory().used/1073741824, 2)}, {psutil.virtual_memory().percent}%)")
+
 # def worker(i):
 #     subprocess_start = datetime.now()
 #     phase_1_details.append(
@@ -68,26 +87,26 @@ class PhaseOne(Report):
 
     def multprocessing_images_download(self, no_of_images, max_workers=10):
 
-        global worker
+        # global worker
 
-        def worker(i, m_phase_1_sub_duration, m_phase_1_details):
-            # subprocess_start = datetime.now()
-            m_phase_1_details.append(
-                f"Task: {i} (start) - PID: {len(psutil.pids())} CPU: {psutil.cpu_percent(interval=None)}%, RAM (GB): avl: {round(psutil.virtual_memory().available/1073741824, 2)}, used: {round(psutil.virtual_memory().used/1073741824, 2)}, {psutil.virtual_memory().percent}%)"
-            )
+        # def worker(i, m_phase_1_sub_duration, m_phase_1_details):
+        #     # subprocess_start = datetime.now()
+        #     m_phase_1_details.append(
+        #         f"Task: {i} (start) - PID: {len(psutil.pids())} CPU: {psutil.cpu_percent(interval=None)}%, RAM (GB): avl: {round(psutil.virtual_memory().available/1073741824, 2)}, used: {round(psutil.virtual_memory().used/1073741824, 2)}, {psutil.virtual_memory().percent}%)"
+        #     )
 
-            res = requests.get(
-                "https://thispersondoesnotexist.com/image", stream=True)
-            image_name = f"img{i}.jpg"
-            if res.status_code == 200:
-                res.raw.decode_content = True
-                with open(f"downloads/{image_name}", "wb") as file:
-                    shutil.copyfileobj(res.raw, file)
+        #     res = requests.get(
+        #         "https://thispersondoesnotexist.com/image", stream=True)
+        #     image_name = f"img{i}.jpg"
+        #     if res.status_code == 200:
+        #         res.raw.decode_content = True
+        #         with open(f"downloads/{image_name}", "wb") as file:
+        #             shutil.copyfileobj(res.raw, file)
 
-            subprocess_end = datetime.now()
-            m_phase_1_sub_duration.append(subprocess_end - subprocess_start)
-            m_phase_1_details.append(
-                f"Task: {i} (end) - PID: {len(psutil.pids())} CPU: {psutil.cpu_percent(interval=None)}%, RAM (GB): avl: {round(psutil.virtual_memory().available/1073741824, 2)}, used: {round(psutil.virtual_memory().used/1073741824, 2)}, {psutil.virtual_memory().percent}%)")
+        #     subprocess_end = datetime.now()
+        #     m_phase_1_sub_duration.append(subprocess_end - subprocess_start)
+        #     m_phase_1_details.append(
+        #         f"Task: {i} (end) - PID: {len(psutil.pids())} CPU: {psutil.cpu_percent(interval=None)}%, RAM (GB): avl: {round(psutil.virtual_memory().available/1073741824, 2)}, used: {round(psutil.virtual_memory().used/1073741824, 2)}, {psutil.virtual_memory().percent}%)")
 
         with multiprocessing.Manager() as manager:
             m_phase_1_sub_duration = manager.list()  # Can be shared between processes
@@ -95,7 +114,7 @@ class PhaseOne(Report):
 
             pool = multiprocessing.Pool(max_workers)
             for i in range(0, no_of_images):
-                pool.apply_async(worker, args=(
+                pool.apply_async(multiprocessing_worker, args=(
                     i, m_phase_1_sub_duration, m_phase_1_details))
 
             pool.close()
