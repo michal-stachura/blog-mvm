@@ -1,17 +1,17 @@
 import base64
+from typing import Callable
 from faker import Faker
-from app.utils import generate_details_log
+from app.utils import generate_details_log, convert_html_to_pdf
 import psutil
 import concurrent.futures
 import multiprocessing
 
 from datetime import datetime, timedelta
-from app.generate_pdf import convert_html_to_pdf
 
 fake = Faker()
 
 
-def job(i: int):
+def job(i: int) -> None:
     with open(f"downloads/img{i}.jpg", "rb") as img:
         face = base64.b64encode(img.read())
     context = {
@@ -28,12 +28,49 @@ def job(i: int):
     convert_html_to_pdf(context, output_filename)
 
 
+def multiprocessing_worker(
+    i: int,
+    phase_2_sub_duration: Callable,
+    phase_2_details: Callable,
+    job: Callable[[int, str], None],
+    generate_details_log: Callable[[int, list, float, Callable, datetime | None], str],
+    fake: Callable
+) -> None:
+    fake = fake
+    subprocess_start = datetime.now()
+    phase_2_details.append(
+        generate_details_log(
+            i,
+            psutil.pids(),
+            psutil.cpu_percent(interval=None),
+            psutil.virtual_memory(),
+            subprocess_start
+        )
+    )
+
+    job(i=i)
+
+    subprocess_end = datetime.now()
+    phase_2_sub_duration.append(subprocess_end - subprocess_start)
+    phase_2_details.append(
+        generate_details_log(
+            i,
+            psutil.pids(),
+            psutil.cpu_percent(interval=None),
+            psutil.virtual_memory()
+        )
+    )
+
+
 class PhaseTwo():
 
-    phase_2_sub_duration = []
-    phase_2_details = []
-    fake = Faker()
-    start = datetime.now()
+    def __init__(self) -> None:
+
+        self.start = datetime.now()
+        self.phase_2_sub_duration = []
+        self.phase_2_details = []
+
+        return super().__init__()
 
     def __worker(self, i):
         subprocess_start = datetime.now()
@@ -70,33 +107,6 @@ class PhaseTwo():
                 executor.submit(self.__worker, i)
 
     def multiprocessing_cv_generate(self, no_of_cv, max_workers):
-        global worker
-
-        def worker(i, phase_2_sub_duration, phase_2_details):
-            subprocess_start = datetime.now()
-            phase_2_details.append(
-                f"Task: {i} (start) - PID: {len(psutil.pids())} CPU: {psutil.cpu_percent(interval=None)}%, RAM (GB): avl: {round(psutil.virtual_memory().available/1073741824, 2)}, used: {round(psutil.virtual_memory().used/1073741824, 2)}, {psutil.virtual_memory().percent}%)"
-            )
-
-            with open(f"downloads/img{i}.jpg", "rb") as img:
-                face = base64.b64encode(img.read())
-            context = {
-                "name": self.fake.name(),
-                "birth": self.fake.date(),
-                "phone": self.fake.phone_number(),
-                "email": self.fake.email(),
-                "address": self.fake.address(),
-                "bio": self.fake.text(),
-                "face": f"data:image/jpeg;base64,{face.decode('utf-8')}"
-            }
-
-            output_filename = f"test{i}.pdf"
-            convert_html_to_pdf(context, output_filename)
-
-            subprocess_end = datetime.now()
-            phase_2_sub_duration.append(subprocess_end - subprocess_start)
-            phase_2_details.append(
-                f"Task: {i} (end) - PID: {len(psutil.pids())} CPU: {psutil.cpu_percent(interval=None)}%, RAM (GB): avl: {round(psutil.virtual_memory().available/1073741824, 2)}, used: {round(psutil.virtual_memory().used/1073741824, 2)}, {psutil.virtual_memory().percent}%)")
 
         with multiprocessing.Manager() as manager:
             phase_2_sub_duration = manager.list()  # Can be shared between processes
@@ -104,8 +114,8 @@ class PhaseTwo():
 
             pool = multiprocessing.Pool(max_workers)
             for i in range(0, no_of_cv):
-                pool.apply_async(worker, args=(
-                    i, phase_2_sub_duration, phase_2_details))
+                pool.apply_async(multiprocessing_worker, args=(
+                    i, phase_2_sub_duration, phase_2_details, job, generate_details_log, fake))
 
             pool.close()
             pool.join()
