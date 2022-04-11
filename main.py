@@ -2,7 +2,6 @@
 import logging
 import json
 import argparse
-import os
 
 from app.phase1 import PhaseOne
 from app.phase2 import PhaseTwo
@@ -51,6 +50,7 @@ if args.p1_type == "multithreading":
 if args.p1_type == "multiprocessing":
     phase_one.multprocessing_images_download(
         args.cvs, max_workers=args.p1_max_workers)
+
 phase_one_duration = phase_one.get_duration()
 
 
@@ -66,6 +66,8 @@ if args.p2_type == "multithreading":
 if args.p2_type == "multiprocessing":
     phase_two.multiprocessing_cv_generate(
         args.cvs, max_workers=args.p2_max_workers)
+phase_two.zip_cvs()
+
 phase_two_duration = phase_two.get_duration()
 
 

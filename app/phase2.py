@@ -3,6 +3,7 @@ from typing import Callable
 from faker import Faker
 from app.utils import generate_details_log, convert_html_to_pdf
 import psutil
+import shutil
 import concurrent.futures
 import multiprocessing
 
@@ -122,6 +123,9 @@ class PhaseTwo():
 
             self.phase_2_sub_duration = list(phase_2_sub_duration)
             self.phase_2_details = list(phase_2_details)
+
+    def zip_cvs(self):
+        shutil.make_archive("zipped_cvs", "zip", "results")
 
     def get_avg_time(self):
         return sum(self.phase_2_sub_duration, timedelta()) / len(self.phase_2_sub_duration)
