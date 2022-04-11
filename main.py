@@ -12,7 +12,7 @@ logging.basicConfig(
     format="%(message)s"
 )
 
-parser = argparse.ArgumentParser(description='Process some integers.')
+parser = argparse.ArgumentParser(description='Test config')
 parser.add_argument('--cvs', type=int, default=10)
 parser.add_argument('--details', type=str, default="N", choices=["Y", "N"])
 parser.add_argument(
