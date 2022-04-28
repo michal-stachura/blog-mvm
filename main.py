@@ -6,12 +6,13 @@ import argparse
 from app.phase1 import PhaseOne
 from app.phase2 import PhaseTwo
 
-
+# Logging config
 logging.basicConfig(
     level=logging.INFO,
     format="%(message)s"
 )
 
+# Settings setup
 parser = argparse.ArgumentParser(description='Test config')
 parser.add_argument('--cvs', type=int, default=10)
 parser.add_argument('--details', type=str, default="N", choices=["Y", "N"])
